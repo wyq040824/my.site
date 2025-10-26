@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大学生职业选择游戏</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        
+        .scene {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .scene-content {
+            margin-bottom: 30px;
+        }
+        
+        .scene-title {
+            font-size: 22px;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .scene-description {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+        
+        .option-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .option-text {
+            flex: 1;
+        }
+        
+        .result {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .salary {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2ecc71;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-description {
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .restart-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+        }
+        
+        .restart-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(52, 152, 219, 0.4);
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #ecf0f1;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: #3498db;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .qr-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            margin: 15px auto;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .deploy-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .salary {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>大学生职业选择游戏</h1>
+            <p class="subtitle">你的选择将影响你的初始薪资，但结果可能出乎意料！</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <!-- 场景1 -->
+        <div class="scene active" id="scene1">
+            <div class="scene-content">
+                <h2 class="scene-title">大三下学期，你面临选择</h2>
+                <p class="scene-description">大学生活已过大半，现在是决定未来方向的关键时刻。不同的选择将带你走上完全不同的职业道路。</p>
+                <div class="options">
+                    <div class="option" onclick="selectOption('A')">
+                        <div class="option-icon">A</div>
+                        <div class="option-text">考研：继续深造，提高学历</div>
+                    </div>
+                    <div class="option" onclick="selectOption('B')">
+                        <div class="option-icon">B</div>
+                        <div class="option-text">考编：争取教师或事业单位编制</div>
+                    </div>
+                    <div class="option" onclick="selectOption('C')">
+                        <div class="option-icon">C</div>
+                        <div class="option-text">考公：报考公务员，寻求稳定工作</div>
+                    </div>
+                    <div class="option" onclick="selectOption('D')">
+                        <div class="option-icon">D</div>
+                        <div class="option-text">自己找工作：直接进入职场，积累经验</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 场景2 -->
+        <div class="scene" id="scene2">
+            <div class="scene-content">
+                <h2 class="scene-title" id="scene2-title"></h2>
+                <p class="scene-description" id="scene2-description"></p>
+                <div class="options" id="scene2-options">
+                    <!-- 选项将由JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 场景3 -->
+        <div class="scene" id="scene3">
+            <div class="scene-content">
+                <h2 class="scene-title" id="scene3-title"></h2>
+                <p class="scene-description" id="scene3-description"></p>
+                <div class="options" id="scene3-options">
+                    <!-- 选项将由JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 场景4 -->
+        <div class="scene" id="scene4">
+            <div class="scene-content">
+                <h2 class="scene-title" id="scene4-title"></h2>
+                <p class="scene-description" id="scene4-description"></p>
+                <div class="options" id="scene4-options">
+                    <!-- 选项将由JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 结果页面 -->
+        <div class="scene" id="result">
+            <div class="result">
+                <h2 class="scene-title">你的初始薪资是</h2>
+                <div class="salary" id="finalSalary">0</div>
+                <p class="result-description" id="resultDescription"></p>
+                <button class="restart-btn" onclick="restartGame()">再玩一次</button>
+            </div>
+        </div>
+        
+        <div class="qr-section">
+            <p>扫描二维码在手机上玩这个游戏</p>
+            <div class="qr-code" id="qrcode"></div>
+            <div class="deploy-info">
+                <p><strong>部署说明：</strong></p>
+                <p>1. 将此HTML文件上传到Web服务器或静态网站托管服务</p>
+                <p>2. 获取游戏的公开URL地址</p>
+                <p>3. 使用二维码生成器为该URL生成二维码</p>
+                <p>4. 手机用户扫描二维码即可在手机上玩游戏</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            currentScene: 1,
+            totalScenes: 4,
+            path: [],
+            finalSalary: 0
+        };
+        
+        // 游戏路径数据
+        const gameData = {
+            // 第一幕选项
+            "A": {
+                title: "基于考研的选择",
+                description: "你选择了考研之路，现在需要决定如何安排备考时间。",
+                options: {
+                    "A1": {
+                        text: "全力备考：放弃一切社交和娱乐，专心学习",
+                        next: {
+                            title: "考研初试结果",
+                            description: "经过几个月的全力备考，考研初试结束了。",
+                            options: {
+                                "A1a": {
+                                    text: "考研初试成绩不错，积极准备复试",
+                                    next: {
+                                        title: "复试结果",
+                                        description: "你参加了研究生复试，等待最终结果。",
+                                        options: {
+                                            "A1a-i": { text: "复试成功，被研究生录取", salary: 0 },
+                                            "A1a-ii": { text: "复试失败，匆忙找工作", salary: 4000 }
+                                        }
+                                    }
+                                },
+                                "A1b": {
+                                    text: "考研初试感觉不佳，开始寻找工作后备方案",
+                                    next: {
+                                        title: "求职结果",
+                                        description: "你开始积极寻找工作机会。",
+                                        options: {
+                                            "A1b-i": { text: "找到一家教育机构做讲师", salary: 5000 },
+                                            "A1b-ii": { text: "找到一家文化公司做编辑", salary: 4500 }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "A2": {
+                        text: "边备考边实习：同时积累工作经验，但可能分散精力",
+                        next: {
+                            title: "实习与备考的平衡",
+                            description: "你一边实习一边备考，时间安排紧张。",
+                            options: {
+                                "A2a": {
+                                    text: "实习公司欣赏你，提供转正机会，你决定放弃考研",
+                                    next: {
+                                        title: "实习转正",
+                                        description: "你决定接受实习公司的转正offer。",
+                                        options: {
+                                            "A2a-i": { text: "在实习公司做新媒体运营", salary: 5500 },
+                                            "A2a-ii": { text: "在实习公司做行政助理", salary: 4000 }
+                                        }
+                                    }
+                                },
+                                "A2b": {
+                                    text: "坚持考研，但实习占用时间，备考不充分",
+                                    next: {
+                                        title: "考研与求职结果",
+                                        description: "你坚持参加了研究生考试，同时也在寻找工作机会。",
+                                        options: {
+                                            "A2b-i": { text: "考研失败，毕业后找到一份文员工作", salary: 3500 },
+                                            "A2b-ii": { text: "考研意外成功，但学校普通", salary: 0 }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "B": {
+                title: "基于考编的选择",
+                description: "你选择了考编之路，目标是进入教师或事业单位。",
+                options: {
+                    "B1": {
+                        text: "备考教师编制：专注于教师招聘考试",
+                        next: {
+                            title: "教师编制考试结果",
+                            description: "你参加了教师编制考试，等待结果。",
+                            options: {
+                                "B1a": {
+                                    text: "教师编制考试顺利，进入面试环节",
+                                    next: {
+                                        title: "教师面试结果",
+                                        description: "你参加了教师岗位的面试。",
+                                        options: {
+                                            "B1a-i": { text: "面试成功，成为小学教师", salary: 4500 },
+                                            "B1a-ii": { text: "面试失败，找到培训机构工作", salary: 5000 }
+                                        }
+                                    }
+                                },
+                                "B1b": {
+                                    text: "教师编制考试失利，考虑其他选项",
+                                    next: {
+                                        title: "其他职业选择",
+                                        description: "教师编制考试未通过，你需要考虑其他职业方向。",
+                                        options: {
+                                            "B1b-i": { text: "报考事业单位", salary: 4000 },
+                                            "B1b-ii": { text: "找到企业行政工作", salary: 3800 }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "B2": {
+                        text: "备考事业单位编制：申请各类事业单位职位",
+                        next: {
+                            title: "事业单位考试结果",
+                            description: "你参加了事业单位编制考试。",
+                            options: {
+                                "B2a": {
+                                    text: "事业单位考试通过，等待体检和政审",
+                                    next: {
+                                        title: "事业单位入职流程",
+                                        description: "你通过了事业单位笔试，进入后续流程。",
+                                        options: {
+                                            "B2a-i": { text: "体检政审通过，成为事业单位职员", salary: 5000 },
+                                            "B2a-ii": { text: "体检政审未过，找到社区工作", salary: 3500 }
+                                        }
+                                    }
+                                },
+                                "B2b": {
+                                    text: "事业单位考试失败，转向企业求职",
+                                    next: {
+                                        title: "企业求职",
+                                        description: "事业单位考试未通过，你开始寻找企业工作。",
+                                        options: {
+                                            "B2b-i": { text: "找到文化馆工作", salary: 4200 },
+                                            "B2b-ii": { text: "找到公关公司工作", salary: 5500 }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "C": {
+                title: "基于考公的选择",
+                description: "你选择了考公之路，目标是成为公务员。",
+                options: {
+                    "C1": {
+                        text: "备考国家公务员：目标中央机关或部委",
+                        next: {
+                            title: "国考结果",
+                            description: "你参加了国家公务员考试。",
+                            options: {
+                                "C1a": {
+                                    text: "国考笔试通过，准备面试",
+                                    next: {
+                                        title: "国考面试结果",
+                                        description: "你参加了国家公务员面试。",
+                                        options: {
+                                            "C1a-i": { text: "面试成功，成为国家公务员", salary: 6000 },
+                                            "C1a-ii": { text: "面试失败，找到国企工作", salary: 5500 }
+                                        }
+                                    }
+                                },
+                                "C1b": {
+                                    text: "国考笔试未过，考虑省考或找工作",
+                                    next: {
+                                        title: "后续选择",
+                                        description: "国考未通过，你需要决定下一步。",
+                                        options: {
+                                            "C1b-i": { text: "继续备考省考", salary: 0 },
+                                            "C1b-ii": { text: "立即找工作，找到银行客服工作", salary: 5000 }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "C2": {
+                        text: "备考地方公务员：目标省市级机关",
+                        next: {
+                            title: "省考结果",
+                            description: "你参加了地方公务员考试。",
+                            options: {
+                                "C2a": {
+                                    text: "省考笔试通过，进入面试",
+                                    next: {
+                                        title: "省考面试结果",
+                                        description: "你参加了地方公务员面试。",
+                                        options: {
+                                            "C2a-i": { text: "面试成功，成为地方公务员", salary: 5500 },
+                                            "C2a-ii": { text: "面试失败，找到私企文职工作", salary: 4500 }
+                                        }
+                                    }
+                                },
+                                "C2b": {
+                                    text: "省考笔试失败，寻找其他工作",
+                                    next: {
+                                        title: "其他工作选择",
+                                        description: "省考未通过，你需要寻找其他工作机会。",
+                                        options: {
+                                            "C2b-i": { text: "报考事业单位", salary: 4000 },
+                                            "C2b-ii": { text: "找到销售工作", salary: 6000 }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "D": {
+                title: "基于自己找工作的选择",
+                description: "你选择了直接找工作，准备进入职场。",
+                options: {
+                    "D1": {
+                        text: "积极投简历参加招聘会：广泛申请企业职位",
+                        next: {
+                            title: "求职结果",
+                            description: "你积极投递简历，参加各种招聘会。",
+                            options: {
+                                "D1a": {
+                                    text: "收到多家公司面试邀请，积极准备",
+                                    next: {
+                                        title: "面试结果",
+                                        description: "你参加了多家公司的面试。",
+                                        options: {
+                                            "D1a-i": { text: "接受一家互联网公司内容运营offer", salary: 6000 },
+                                            "D1a-ii": { text: "接受一家传统企业行政offer", salary: 4000 }
+                                        }
+                                    }
+                                },
+                                "D1b": {
+                                    text: "简历回应寥寥，考虑降低期望或学习技能",
+                                    next: {
+                                        title: "调整求职策略",
+                                        description: "求职不顺利，你需要调整策略。",
+                                        options: {
+                                            "D1b-i": { text: "降低期望，找到小公司文员工作", salary: 3500 },
+                                            "D1b-ii": { text: "继续学习技能，毕业后找到freelance工作", salary: 3000 }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "D2": {
+                        text: "学习新技能如新媒体运营：提升竞争力再求职",
+                        next: {
+                            title: "技能学习与求职",
+                            description: "你花时间学习新技能，提升自己的竞争力。",
+                            options: {
+                                "D2a": {
+                                    text: "技能提升明显，获得一些兼职机会",
+                                    next: {
+                                        title: "职业选择",
+                                        description: "你的技能提升带来了更多工作机会。",
+                                        options: {
+                                            "D2a-i": { text: "将兼职转为全职，做新媒体运营", salary: 5800 },
+                                            "D2a-ii": { text: "接受一家广告公司文案offer", salary: 5200 }
+                                        }
+                                    }
+                                },
+                                "D2b": {
+                                    text: "技能学习效果一般，求职仍困难",
+                                    next: {
+                                        title: "最终求职结果",
+                                        description: "尽管学习了新技能，求职仍然不太顺利。",
+                                        options: {
+                                            "D2b-i": { text: "找到教育机构咨询工作", salary: 4500 },
+                                            "D2b-ii": { text: "找到网络编辑工作", salary: 4000 }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        
+        // 更新进度条
+        function updateProgress() {
+            const progress = (gameState.currentScene / gameState.totalScenes) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+        }
+        
+        // 选择选项
+        function selectOption(optionKey) {
+            // 记录选择路径
+            gameState.path.push(optionKey);
+            
+            // 检查是否到达最后一幕
+            if (gameState.currentScene < gameState.totalScenes) {
+                // 移动到下一个场景
+                document.getElementById(`scene${gameState.currentScene}`).classList.remove('active');
+                gameState.currentScene++;
+                document.getElementById(`scene${gameState.currentScene}`).classList.add('active');
+                
+                // 更新场景内容
+                updateSceneContent();
+                
+                // 更新进度条
+                updateProgress();
+            } else {
+                // 游戏结束，显示结果
+                showResult();
+            }
+        }
+        
+        // 更新场景内容
+        function updateSceneContent() {
+            const currentScene = gameState.currentScene;
+            const path = gameState.path;
+            
+            // 根据当前路径获取场景数据
+            let sceneData = gameData[path[0]];
+            for (let i = 1; i < path.length; i++) {
+                sceneData = sceneData.options[path[i]];
+                if (sceneData.next) {
+                    sceneData = sceneData.next;
+                }
+            }
+            
+            // 更新场景标题和描述
+            document.getElementById(`scene${currentScene}-title`).textContent = sceneData.title;
+            document.getElementById(`scene${currentScene}-description`).textContent = sceneData.description;
+            
+            // 更新选项
+            const optionsContainer = document.getElementById(`scene${currentScene}-options`);
+            optionsContainer.innerHTML = '';
+            
+            for (const [key, option] of Object.entries(sceneData.options)) {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.onclick = () => selectOption(key);
+                
+                optionElement.innerHTML = `
+                    <div class="option-icon">${key.charAt(key.length-1)}</div>
+                    <div class="option-text">${option.text}</div>
+                `;
+                
+                optionsContainer.appendChild(optionElement);
+            }
+        }
+        
+        // 显示结果
+        function showResult() {
+            // 根据路径获取最终薪资
+            let sceneData = gameData[gameState.path[0]];
+            for (let i = 1; i < gameState.path.length - 1; i++) {
+                sceneData = sceneData.options[gameState.path[i]];
+                if (sceneData.next) {
+                    sceneData = sceneData.next;
+                }
+            }
+            
+            // 获取最终选项的薪资
+            const finalOptionKey = gameState.path[gameState.path.length - 1];
+            const finalOption = sceneData.options[finalOptionKey];
+            const finalSalary = finalOption.salary;
+            
+            // 隐藏当前场景
+            document.getElementById(`scene${gameState.currentScene}`).classList.remove('active');
+            
+            // 显示结果
+            document.getElementById('finalSalary').textContent = finalSalary === 0 ? '0元' : `¥${finalSalary}`;
+            
+            // 根据薪资给出评价
+            let description = "";
+            if (finalSalary >= 5500) {
+                description = "恭喜！你的初始薪资相当不错，你的选择带来了丰厚的回报。";
+            } else if (finalSalary >= 4000) {
+                description = "不错！你的初始薪资处于平均水平，你的选择带来了稳定的结果。";
+            } else if (finalSalary > 0) {
+                description = "有点可惜，你的初始薪资略低于平均水平，但人生充满可能性，未来可期！";
+            } else {
+                description = "虽然暂时没有收入，但继续深造是长期投资，未来可能会带来更高的回报！";
+            }
+            
+            document.getElementById('resultDescription').textContent = description;
+            document.getElementById('result').classList.add('active');
+            
+            // 更新进度条到100%
+            document.getElementById('progress').style.width = '100%';
+        }
+        
+        // 重新开始游戏
+        function restartGame() {
+            // 重置游戏状态
+            gameState.currentScene = 1;
+            gameState.path = [];
+            gameState.finalSalary = 0;
+            
+            // 隐藏结果页面
+            document.getElementById('result').classList.remove('active');
+            
+            // 显示第一个场景
+            document.getElementById('scene1').classList.add('active');
+            
+            // 重置进度条
+            document.getElementById('progress').style.width = '0%';
+        }
+        
+        // 生成二维码
+        function generateQRCode() {
+            // 在实际部署中，这里应该是你的游戏URL
+            const gameUrl = window.location.href;
+            
+            // 创建二维码
+            const qrcodeElement = document.getElementById('qrcode');
+            qrcodeElement.innerHTML = ''; // 清空之前的二维码
+            
+            // 使用QRCode库生成二维码
+            new QRCode(qrcodeElement, {
+                text: gameUrl,
+                width: 150,
+                height: 150,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+        
+        // 初始化
+        updateProgress();
+        generateQRCode();
+    </script>
+</body>
+</html>
